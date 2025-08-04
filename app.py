@@ -2,13 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import requests
-import json
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from keep_alive import keep_alive
 import discord
 import asyncio
+from matplotlib import rcParams
 
 keep_alive()
 load_dotenv()
@@ -114,19 +114,22 @@ def fetch_airline_data():
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
 
-    print(json.dumps(all_airline_data, indent=4))
     return all_airline_data
 
 
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib import rcParams
+
+
 
 def save_airline_table_image(airline_data, filename="airline_table.png"):
     df = pd.DataFrame(airline_data)
     df = df[["name", "abbr", "owner", "total_flights", "flights_last_30_days", "days_to_pass_str"]]
     df.columns = ["Name", "ID", "CEO", "Total Flights", "Flights Last 30 Days", "Estimated Time Until CCX Passes"]
 
+    df["Total Flights"] = df["Total Flights"].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
+    df["Flights Last 30 Days"] = df["Flights Last 30 Days"].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
+
+
+    
     # Settings
     font_size = 10
     row_height = 0.6  # inches
@@ -154,8 +157,8 @@ def save_airline_table_image(airline_data, filename="airline_table.png"):
         # Convert from pixels to inches (approx 96 dpi)
         col_widths.append(max_width / 96 + padding)
 
-    total_width = sum(col_widths) 
-    total_height = 6
+    total_width = sum(col_widths) + 1
+    total_height = 7
 
     fig, ax = plt.subplots(figsize=(total_width, total_height))
     ax.axis("off")
@@ -217,6 +220,7 @@ def generate_and_send():
     data = fetch_airline_data()
     save_airline_table_image(data)
     client.loop.create_task(send_image())
+    print(f"[{datetime.utcnow()}] Update complete.")
 
 
 
