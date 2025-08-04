@@ -157,7 +157,7 @@ def save_airline_table_image(airline_data, filename="airline_table.png"):
         # Convert from pixels to inches (approx 96 dpi)
         col_widths.append(max_width / 96 + padding)
 
-    total_width = sum(col_widths) + 1
+    total_width = sum(col_widths) + 0.5
     total_height = 7
 
     fig, ax = plt.subplots(figsize=(total_width, total_height))
