@@ -113,7 +113,7 @@ def fetch_airline_data():
 
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
-
+    print (all_airline_data)
     return all_airline_data
 
 
