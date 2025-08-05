@@ -77,9 +77,9 @@ def fetch_airline_data():
             all_airline_data.append(info)
 
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching data for airline {airline_id}: {e}")
+            print(f"Error fetching data for airline {airline_id}: {e}", flush=True)
         except KeyError as e:
-            print(f"Missing expected field for airline {airline_id}: {e}")
+            print(f"Missing expected field for airline {airline_id}: {e}", flush=True)
 
 
     CCXTotalFlights = None
@@ -95,7 +95,7 @@ def fetch_airline_data():
     if CCXTotalFlights is not None and CCXMonthFlights is not None and CCXMonthFlights > 0:
         CCXRate = CCXMonthFlights / 30
     else: 
-        print("Error: Missing or invalid CCX stats")
+        print("Error: Missing or invalid CCX stats", flush=True)
         CCXRate = None
 
     if CCXRate:
@@ -114,7 +114,7 @@ def fetch_airline_data():
 
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
-    print (json.dumps(all_airline_data, indent=4))
+    print (json.dumps(all_airline_data, indent=4), flush=True)
     return all_airline_data
 
 
@@ -217,23 +217,23 @@ async def send_image():
 
 
 def generate_and_send():
-    print("Running update...")
+    print("Running update...", flush=True)
     data = fetch_airline_data()
     save_airline_table_image(data)
     client.loop.create_task(send_image())
-    print("Update complete.")
+    print("Update complete.", flush=True)
 
 
 
 def schedule_updates():
     scheduler = BackgroundScheduler(timezone=timezone.utc)
-    scheduler.add_job(generate_and_send, "cron", hour=0, minute=31)
+    scheduler.add_job(generate_and_send, "cron", hour=0, minute=40)
     scheduler.start()
 
 
 @client.event
 async def on_ready():
-    print("Discord bot ready.")
+    print("Discord bot ready.", flush=True)
     schedule_updates()
 
 
