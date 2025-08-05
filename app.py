@@ -46,7 +46,7 @@ def fetch_airline_data():
         "X-Pilot-Token": fshub_token
     }
 
-    airline_ids = [9999, 2145, 2216, 3822, 4817, 3427, 1876, 1986, 1850, 2691, 1341, 3681, 2713, 2599, 2090, 2639, 1918, 3972, 2397, 6076]
+    airline_ids = [2145, 2216, 3822, 4817, 3427, 1876, 1986, 1850, 2691, 1341, 3681, 2713, 2599, 2090, 2639, 1918, 3972, 2397, 6076]
     
 
     for airline_id in airline_ids:
@@ -115,7 +115,6 @@ def fetch_airline_data():
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
     print (json.dumps(all_airline_data, indent=4))
-    print ("test")
     return all_airline_data
 
 
@@ -228,14 +227,13 @@ def generate_and_send():
 
 def schedule_updates():
     scheduler = BackgroundScheduler(timezone=timezone.utc)
-    scheduler.add_job(generate_and_send, "cron", hour=0, minute=25)
+    scheduler.add_job(generate_and_send, "cron", hour=0, minute=31)
     scheduler.start()
 
 
 @client.event
 async def on_ready():
     print("Discord bot ready.")
-    generate_and_send()  # Send immediately once at startup
     schedule_updates()
 
 
