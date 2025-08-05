@@ -227,7 +227,7 @@ def generate_and_send():
 
 def schedule_updates():
     scheduler = BackgroundScheduler(timezone=timezone.utc)
-    scheduler.add_job(generate_and_send, "cron", hour=0, minute=40)
+    scheduler.add_job(generate_and_send, "cron", hour=0, minute=0)
     scheduler.start()
 
 
