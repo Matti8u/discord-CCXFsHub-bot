@@ -9,6 +9,7 @@ from keep_alive import keep_alive
 import discord
 import asyncio
 from matplotlib import rcParams
+import json
 
 keep_alive()
 load_dotenv()
@@ -45,7 +46,7 @@ def fetch_airline_data():
         "X-Pilot-Token": fshub_token
     }
 
-    airline_ids = [2145, 2216, 3822, 4817, 3427, 1876, 1986, 1850, 2691, 1341, 3681, 2713, 2599, 2090, 2639, 1918, 3972, 2397, 6076]
+    airline_ids = [9999, 2145, 2216, 3822, 4817, 3427, 1876, 1986, 1850, 2691, 1341, 3681, 2713, 2599, 2090, 2639, 1918, 3972, 2397, 6076]
     
 
     for airline_id in airline_ids:
@@ -113,7 +114,7 @@ def fetch_airline_data():
 
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
-    print (all_airline_data)
+    print (json.dumps(all_airline_data, indent=4))
     return all_airline_data
 
 
@@ -216,11 +217,11 @@ async def send_image():
 
 
 def generate_and_send():
-    print(f"[{datetime.utcnow()}] Running update...")
+    print("Running update...")
     data = fetch_airline_data()
     save_airline_table_image(data)
     client.loop.create_task(send_image())
-    print(f"[{datetime.utcnow()}] Update complete.")
+    print("Update complete.")
 
 
 
