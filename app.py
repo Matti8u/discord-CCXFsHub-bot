@@ -115,6 +115,7 @@ def fetch_airline_data():
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
     print (json.dumps(all_airline_data, indent=4))
+    print ("test")
     return all_airline_data
 
 
@@ -227,7 +228,7 @@ def generate_and_send():
 
 def schedule_updates():
     scheduler = BackgroundScheduler(timezone=timezone.utc)
-    scheduler.add_job(generate_and_send, "cron", hour=0, minute=0)
+    scheduler.add_job(generate_and_send, "cron", hour=0, minute=25)
     scheduler.start()
 
 
