@@ -213,6 +213,7 @@ if discord_token is None:
 
 
 intents = discord.Intents.default()
+intents.message_content = True
 client = discord.Client(intents=intents)
 
 async def send_image():
