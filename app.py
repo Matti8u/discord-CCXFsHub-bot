@@ -206,6 +206,7 @@ def save_airline_table_image(airline_data, filename="airline_table.png"):
 
 discord_token = os.getenv("DISCORD_TOKEN")
 channel_id = int(os.getenv("CHANNEL_ID"))
+USER_ID = int(os.getenv("USER_ID"))
 
 if discord_token is None:
     raise ValueError("DISCORD_TOKEN environment variable not set.")
@@ -222,7 +223,7 @@ async def send_image():
         await channel.send(file=discord.File("airline_table.png"))
 
 
-def generate_and_send():
+async def generate_and_send():
     print("Running update...", flush=True)
     data = fetch_airline_data()
     save_airline_table_image(data)
@@ -240,6 +241,17 @@ def schedule_updates():
     scheduler = BackgroundScheduler(timezone=timezone.utc)
     scheduler.add_job(generate_and_send, "cron", hour=0, minute=0)
     scheduler.start()
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.strip() == "!ccxbottest":
+        if message.author.id == USER_ID:
+            await message.channel.send("✅ CCX bot test started!")
+            await generate_and_send()
 
 
 @client.event
