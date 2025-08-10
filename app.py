@@ -14,6 +14,8 @@ import json
 keep_alive()
 load_dotenv()
 
+scheduler_started = False
+
 def days_to_ymd(days):
     if days is None or days < 0:
         return "N/A"
@@ -69,6 +71,7 @@ def fetch_airline_data():
                 "name": airline["name"],
                 "abbr": airline["abbr"],
                 "owner": airline["owner"]["name"],
+                "total_pilots": stats["total_pilots"],
                 "total_flights": stats.get("all_time", {}).get("total_flights"),
                 "flights_last_30_days": stats.get("month", {}).get("total_flights"),
                 "days_to_pass": None,
@@ -109,12 +112,11 @@ def fetch_airline_data():
                 else:
                     airline["days_to_pass_str"] = "N/A"
 
-    all_airline_data = [airline for airline in all_airline_data if airline["total_flights"] >= CCXTotalFlights]
 
 
     all_airline_data.sort(key=lambda a: a["total_flights"], reverse=True)
 
-    print (json.dumps(all_airline_data, indent=4), flush=True)
+    print (json.dumps(all_airline_data, indent=2), flush=True)
     return all_airline_data
 
 
@@ -123,11 +125,12 @@ def fetch_airline_data():
 
 def save_airline_table_image(airline_data, filename="airline_table.png"):
     df = pd.DataFrame(airline_data)
-    df = df[["name", "abbr", "owner", "total_flights", "flights_last_30_days", "days_to_pass_str"]]
-    df.columns = ["Name", "ID", "CEO", "Total Flights", "Flights Last 30 Days", "Estimated Time Until CCX Passes"]
+    df = df[["name", "abbr", "owner", "total_pilots", "total_flights", "flights_last_30_days", "days_to_pass_str"]]
+    df.columns = ["Name", "ID", "CEO", "Pilots", "Total Flights", "Flights Last 30 Days", "Estimated Time Until CCX Passes"]
 
     df["Total Flights"] = df["Total Flights"].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
     df["Flights Last 30 Days"] = df["Flights Last 30 Days"].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
+    df["Pilots"] = df["Pilots"].apply(lambda x: f"{x:,}" if pd.notnull(x) else "N/A")
 
 
     
@@ -177,19 +180,22 @@ def save_airline_table_image(airline_data, filename="airline_table.png"):
     table.set_fontsize(font_size)
     table.scale(1, 1.5)
 
-    # Style header and alternating rows
+    # Style header, alternating rows, and highlight CCX
     for (row, col), cell in table.get_celld().items():
         if row == 0:
-            cell.set_facecolor("#4a7ebb")
+            cell.set_facecolor("#4a7ebb")  # header color
             cell.set_text_props(weight='bold', color='white')
         else:
-            cell.set_facecolor("#f8f8f8" if row % 2 == 0 else "white")
+            airline_name = df.iloc[row-1]["ID"]  
+            if airline_name.lower().startswith("ccx"): 
+                cell.set_facecolor("#ffe599")  
+            else:
+                cell.set_facecolor("#f8f8f8" if row % 2 == 0 else "white")
         cell.set_edgecolor("#cccccc")
 
     plt.tight_layout()
     plt.savefig(filename, bbox_inches="tight", pad_inches=0.05, dpi=150)
     plt.close()
-
 
 
 
@@ -226,6 +232,11 @@ def generate_and_send():
 
 
 def schedule_updates():
+    global scheduler_started
+    if scheduler_started:
+        return
+    scheduler_started = True
+
     scheduler = BackgroundScheduler(timezone=timezone.utc)
     scheduler.add_job(generate_and_send, "cron", hour=0, minute=0)
     scheduler.start()
