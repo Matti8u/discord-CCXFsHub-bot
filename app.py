@@ -251,7 +251,8 @@ async def on_message(message):
 
     if message.content.strip() == "!ccxbottest":
         if message.author.id == USER_ID:
-            await message.channel.send("✅ CCX bot test started!")
+            await message.channel.send("Test started!")
+            print("Manual Test started!", flush=True)
             await generate_and_send()
 
 
