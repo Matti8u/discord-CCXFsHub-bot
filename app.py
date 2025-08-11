@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import requests
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from keep_alive import keep_alive
@@ -225,11 +225,14 @@ async def send_image():
 
 
 async def generate_and_send():
-    print("Running update...", flush=True)
-    data = fetch_airline_data()
-    save_airline_table_image(data)
-    client.loop.create_task(send_image())
-    print("Update complete.", flush=True)
+    try:
+        print("Running update...", flush=True)
+        data = fetch_airline_data()
+        save_airline_table_image(data)
+        await send_image()
+        print("Update complete.", flush=True)
+    except Exception as e:
+        print(f"Error in generate_and_send: {e}", flush=True)
 
 
 
@@ -239,8 +242,8 @@ def schedule_updates():
         return
     scheduler_started = True
 
-    scheduler = BackgroundScheduler(timezone=timezone.utc)
-    scheduler.add_job(generate_and_send, "cron", hour=0, minute=0)
+    scheduler = AsyncIOScheduler(timezone=timezone.utc)
+    scheduler.add_job(generate_and_send, "cron", hour=0, minute=0, max_instances=1)
     scheduler.start()
 
 
@@ -249,7 +252,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.strip() == "!ccxbottest":
+    if message.content.strip().lower() == "!ccxbottest":
         if message.author.id == USER_ID:
             await message.channel.send("Test started!")
             print("Manual Test started!", flush=True)
