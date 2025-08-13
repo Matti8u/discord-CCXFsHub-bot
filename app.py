@@ -304,7 +304,7 @@ def schedule_updates():
     scheduler_started = True
 
     scheduler = AsyncIOScheduler(timezone=timezone.utc)
-    scheduler.add_job(lambda: asyncio.create_task(generate_and_send()), "cron", hour=0, minute=0, max_instances=1)
+    scheduler.add_job(generate_and_send, "cron", hour=4, minute=6, max_instances=1)
     scheduler.start()
 
 
